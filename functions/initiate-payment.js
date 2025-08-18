@@ -2,9 +2,9 @@
 const axios = require('axios');
 
 // PayHero API credentials
-const API_USERNAME = 's9HVkFoSLcxmqxmJQe5u';
-const API_PASSWORD = '765TCwZH5P3P8Z32OCaPF5Bw5e9lTIDoMtwC0a5S';
-const CHANNEL_ID = 3125;
+const API_USERNAME = 'LOV1coowH9xMzNtThWjF';
+const API_PASSWORD = 'hAxiS4X7B8KWDO2QjdPa2zdEMn0dFw4JST5n0eoW';
+const CHANNEL_ID = 3146;
 
 // Generate Basic Auth Token
 const generateBasicAuthToken = () => {
@@ -40,7 +40,7 @@ exports.handler = async (event, context) => {
   
   try {
     const requestBody = JSON.parse(event.body);
-    const { phoneNumber, userId, amount = 150, description = 'SurvayPay Account Activation' } = requestBody;
+    const { phoneNumber, userId, amount = 200, description = 'SurvayPay Account Activation' } = requestBody;
     
     if (!phoneNumber) {
       return {
@@ -60,8 +60,7 @@ exports.handler = async (event, context) => {
       amount: amount,
       phone_number: phoneNumber,
       channel_id: CHANNEL_ID,
-      provider: "sasapay",
-      network_code: "63902",
+      provider: "m-pesa",
       external_reference: externalReference,
       description: description,
       callback_url: callbackUrl
