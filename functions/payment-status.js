@@ -1,9 +1,9 @@
 // Netlify function to check payment status
 const axios = require('axios');
 
-// PayHero API credentials - Updated working credentials
-const API_USERNAME = 'LOVgRBJEZcJWvNWGNrPx';
-const API_PASSWORD = 'YJnLfhMhCCEVJCJGdRYKjgmxvPLJwNdKZKZBfMgV';
+// PayHero API credentials - Latest working credentials
+const API_USERNAME = 'LOV1coowH9xMzNtThWjF';
+const API_PASSWORD = 'hAxiS4X7B8KWDO2QjdPa2zdEMn0dFw4JST5n0eoW';
 
 // Generate Basic Auth Token
 const generateBasicAuthToken = () => {
