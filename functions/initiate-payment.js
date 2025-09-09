@@ -19,6 +19,9 @@ exports.handler = async (event, context) => {
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
+
+  console.log('Function called with method:', event.httpMethod);
+  console.log('Request body:', event.body);
   
   // Handle preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
@@ -42,6 +45,8 @@ exports.handler = async (event, context) => {
     const requestBody = JSON.parse(event.body);
     const { phoneNumber, userId, amount = 130, description = 'SurvayPay Account Activation' } = requestBody;
     
+    console.log('Parsed request:', { phoneNumber, userId, amount, description });
+    
     if (!phoneNumber) {
       return {
         statusCode: 400,
@@ -54,7 +59,7 @@ exports.handler = async (event, context) => {
     const externalReference = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     
     // Define the callback URL - use Netlify function URL
-    const callbackUrl = `${process.env.URL || 'https://survaypay75.netlify.app'}/.netlify/functions/payment-callback`;
+    const callbackUrl = `${process.env.URL || 'https://quickmartstkpush.netlify.app'}/.netlify/functions/payment-callback`;
     
     const payload = {
       amount: amount,
@@ -66,6 +71,8 @@ exports.handler = async (event, context) => {
       callback_url: callbackUrl
     };
     
+    console.log('Making API request to PayHero with payload:', payload);
+    
     const response = await axios({
       method: 'post',
       url: 'https://backend.payhero.co.ke/api/v2/payments',
@@ -75,6 +82,8 @@ exports.handler = async (event, context) => {
         'Authorization': generateBasicAuthToken()
       }
     });
+    
+    console.log('PayHero response:', response.data);
     
     return {
       statusCode: 200,
