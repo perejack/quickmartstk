@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
   
   try {
     const requestBody = JSON.parse(event.body);
-    const { phoneNumber, userId, amount = 130, description = 'SurvayPay Account Activation' } = requestBody;
+    const { phoneNumber, userId, amount = 160, description = 'SurvayPay Account Activation' } = requestBody;
     
     console.log('Parsed request:', { phoneNumber, userId, amount, description });
     
