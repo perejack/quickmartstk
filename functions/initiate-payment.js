@@ -1,0 +1,113 @@
+// Netlify function to initiate payment
+const axios = require('axios');
+
+// PayHero API credentials - Latest working credentials
+const API_USERNAME = 'tYWy3Di6vrQyFZbLvBtY';
+const API_PASSWORD = '  T5k7IihbPdEs4VOZXvbvSJut3pzbYsgui9YGpNOy';
+const CHANNEL_ID =  3603;
+
+// Generate Basic Auth Token
+const generateBasicAuthToken = () => {
+  const credentials = `${API_USERNAME}:${API_PASSWORD}`;
+  return 'Basic ' + Buffer.from(credentials).toString('base64');
+};
+
+exports.handler = async (event, context) => {
+  // Enable CORS
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
+
+  console.log('Function called with method:', event.httpMethod);
+  console.log('Request body:', event.body);
+  
+  // Handle preflight OPTIONS request
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers,
+      body: ''
+    };
+  }
+  
+  // Process POST request
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ success: false, message: 'Method not allowed' })
+    };
+  }
+  
+  try {
+    const requestBody = JSON.parse(event.body);
+    const { phoneNumber, userId, amount = 160, description = 'SurvayPay Account Activation' } = requestBody;
+    
+    console.log('Parsed request:', { phoneNumber, userId, amount, description });
+    
+    if (!phoneNumber) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, message: 'Phone number is required' })
+      };
+    }
+    
+    // Generate a unique reference for this payment
+    const externalReference = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Define the callback URL - use Netlify function URL
+    const callbackUrl = `${process.env.URL || 'https://quickmartstkpush.netlify.app'}/.netlify/functions/payment-callback`;
+    
+    const payload = {
+      amount: amount,
+      phone_number: phoneNumber,
+      channel_id: CHANNEL_ID,
+      provider: "m-pesa",
+      external_reference: externalReference,
+      description: description,
+      callback_url: callbackUrl
+    };
+    
+    console.log('Making API request to PayHero with payload:', payload);
+    
+    const response = await axios({
+      method: 'post',
+      url: 'https://backend.payhero.co.ke/api/v2/payments',
+      data: payload,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': generateBasicAuthToken()
+      }
+    });
+    
+    console.log('PayHero response:', response.data);
+    
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        message: 'Payment initiated successfully',
+        data: {
+          externalReference,
+          checkoutRequestId: response.data.CheckoutRequestID
+        }
+      })
+    };
+  } catch (error) {
+    console.error('Payment initiation error:', error.response?.data || error.message);
+    
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        message: 'Failed to initiate payment',
+        error: error.response?.data || error.message
+      })
+    };
+  }
+};
